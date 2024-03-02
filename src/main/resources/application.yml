@@ -1,9 +1,0 @@
-spring:
-  application:
-    name: eureka-service
-  config:
-    import: configserver:http://localhost:8888
-
-logging:
-  level:
-    web: debug

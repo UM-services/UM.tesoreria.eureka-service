@@ -32,6 +32,11 @@
 			<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-bootstrap</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
@@ -49,6 +54,18 @@
 		</dependencies>
 	</dependencyManagement>
 
+<!--	<profiles>-->
+<!--		<profile>-->
+<!--			<id>prod</id>-->
+<!--			<activation>-->
+<!--				<activeByDefault>true</activeByDefault>-->
+<!--			</activation>-->
+<!--			<properties>-->
+<!--				<spring.profiles.active>prod</spring.profiles.active>-->
+<!--			</properties>-->
+<!--		</profile>-->
+<!--	</profiles>-->
+
 	<build>
 		<plugins>
 			<plugin>
@@ -56,6 +73,12 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+<!--		<resources>-->
+<!--			<resource>-->
+<!--				<directory>src/main/resources</directory>-->
+<!--				<filtering>true</filtering>-->
+<!--			</resource>-->
+<!--		</resources>-->
 	</build>
 
 </project>
