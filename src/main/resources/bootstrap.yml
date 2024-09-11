@@ -24,3 +24,12 @@ logging:
     web: ${app.logging}
     org:
       springframework.cloud.config: ${app.logging}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
