@@ -1,0 +1,39 @@
+title: UM Tesorería Eureka Service
+description: Servidor de Registro y Descubrimiento para Microservicios de UM Tesorería
+theme: jekyll-theme-cayman
+
+# Configuración de Jekyll
+defaults:
+  -
+    scope:
+      path: ""
+    values:
+      layout: default
+
+# Configuración de Markdown
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Configuración de navegación
+navigation:
+  - title: Inicio
+    url: /
+  - title: Documentación
+    url: /project-documentation
+  - title: Configuración
+    url: /configuration-guide
+  - title: API
+    url: /api-documentation
+  - title: Desarrollo
+    url: /development-guide
+
+# Metadatos del proyecto
+project:
+  name: UM Tesorería Eureka Service
+  version: 0.0.1-SNAPSHOT
+  repository: https://github.com/UM-services/UM.tesoreria.eureka-service
+
+# Configurar la página principal
+index_page: index.md 
