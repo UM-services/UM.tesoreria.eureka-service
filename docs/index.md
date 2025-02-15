@@ -15,25 +15,6 @@ El servidor Eureka es un componente crítico en nuestra arquitectura de microser
 - Monitoreo de salud en tiempo real
 - Alta disponibilidad y tolerancia a fallos
 
-## Arquitectura
-
-### Componentes Principales
-
-1. **Registro de Servicios**
-   - Registro automático de instancias
-   - Heartbeat monitoring
-   - Replicación de estado
-
-2. **Descubrimiento de Servicios**
-   - Resolución dinámica de endpoints
-   - Cache distribuida
-   - Balanceo de carga cliente-lado
-
-3. **Monitoreo**
-   - Dashboard de estado
-   - Métricas en tiempo real
-   - Alertas configurables
-
 ## Documentación Técnica
 
 - [Guía de Configuración](configuration-guide.html)
@@ -44,6 +25,7 @@ El servidor Eureka es un componente crítico en nuestra arquitectura de microser
 ## Estado del Proyecto
 
 Consulta nuestra [Documentación Detallada](project-documentation.html) para información sobre:
+
 - Estado actual de los Milestones
 - Issues activos y cerrados
 - Historial de cambios

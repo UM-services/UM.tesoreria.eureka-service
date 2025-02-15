@@ -186,20 +186,21 @@ def generate_wiki_pages():
             os.remove(os.path.expanduser('~/.git-credentials'))
 
 def generate_wiki_content(wiki_dir: Path, data_dir: Path):
-    """Generar contenido de la wiki para el Servidor Eureka"""
-    try:
-        # Verificar y cargar archivos JSON
-        issues_file = data_dir / 'issues.json'
-        milestones_file = data_dir / 'milestones.json'
-        
-        # Verificar contenido antes de procesar
-        issues = verify_json_content(issues_file)
-        milestones = verify_json_content(milestones_file)
-        
-        if not issues and not milestones:
-            print("No hay datos para generar en la wiki")
-            return False
+    """Generar contenido de la wiki usando Path consistentemente"""
+    # Verificar y cargar archivos JSON
+    issues_file = data_dir / 'issues.json'
+    milestones_file = data_dir / 'milestones.json'
+    
+    # Verificar contenido antes de procesar
+    issues = verify_json_content(issues_file)
+    milestones = verify_json_content(milestones_file)
+    
+    if not issues and not milestones:
+        print("No hay datos para generar en la wiki")
+        return False
 
+    # Generar archivos usando Path consistentemente
+    try:
         # Home.md
         with open(wiki_dir / 'Home.md', 'w', encoding='utf-8') as f:
             f.write("""# UM Tesorería Eureka Service
@@ -212,34 +213,9 @@ El Servidor Eureka es el componente central de registro y descubrimiento de serv
 
 ## Navegación Rápida
 
-- [[Arquitectura]]
-- [[Configuración]]
 - [[Milestones]]
 - [[Issues-Activos]]
 - [[Issues-Cerrados]]
-""")
-
-        # Arquitectura.md
-        with open(wiki_dir / 'Arquitectura.md', 'w', encoding='utf-8') as f:
-            f.write("""# Arquitectura del Servidor Eureka
-
-## Componentes Principales
-
-1. **Registro de Servicios**
-   - Registro automático de instancias
-   - Heartbeat monitoring
-   - Replicación de estado
-
-2. **Descubrimiento de Servicios**
-   - Resolución dinámica de endpoints
-   - Cache distribuida con Caffeine
-   - Balanceo de carga cliente-lado
-
-3. **Monitoreo y Actuator**
-   - Dashboard de estado
-   - Endpoints de salud
-   - Métricas en tiempo real
-   - Alertas configurables
 """)
 
         # Milestones.md
@@ -255,6 +231,21 @@ El Servidor Eureka es el componente central de registro y descubrimiento de serv
                 f.write("---\n\n")
 
         # Issues-Activos.md
+        def format_labels(labels_data):
+            """Formatear labels considerando diferentes formatos posibles"""
+            if not labels_data:
+                return []
+            if isinstance(labels_data, list):
+                # Si es una lista de diccionarios
+                if all(isinstance(label, dict) for label in labels_data):
+                    return [label.get('name', '') for label in labels_data]
+                # Si es una lista de strings
+                return labels_data
+            # Si es un string único
+            if isinstance(labels_data, str):
+                return [labels_data]
+            return []
+
         active_issues = [i for i in issues if i['state'] == 'open']
         with open(wiki_dir / 'Issues-Activos.md', 'w', encoding='utf-8') as f:
             f.write("# Issues Activos - Servidor Eureka\n\n")
@@ -262,7 +253,12 @@ El Servidor Eureka es el componente central de registro y descubrimiento de serv
                 f.write(f"## #{issue['number']}: {issue['title']}\n")
                 f.write(f"**Creado:** {issue['created_at']}\n\n")
                 if issue.get('milestone'):
-                    milestone_title = issue['milestone'] if isinstance(issue['milestone'], str) else issue['milestone'].get('title', 'Sin título')
+                    # Si milestone es un diccionario
+                    if isinstance(issue['milestone'], dict):
+                        milestone_title = issue['milestone'].get('title', 'Sin título')
+                    # Si milestone es un string
+                    else:
+                        milestone_title = issue['milestone']
                     f.write(f"**Milestone:** {milestone_title}\n\n")
                 if issue.get('labels'):
                     labels = format_labels(issue['labels'])
@@ -280,7 +276,12 @@ El Servidor Eureka es el componente central de registro y descubrimiento de serv
                 f.write(f"**Creado:** {issue['created_at']}\n")
                 f.write(f"**Cerrado:** {issue.get('closed_at', 'Desconocido')}\n\n")
                 if issue.get('milestone'):
-                    milestone_title = issue['milestone'] if isinstance(issue['milestone'], str) else issue['milestone'].get('title', 'Sin título')
+                    # Si milestone es un diccionario
+                    if isinstance(issue['milestone'], dict):
+                        milestone_title = issue['milestone'].get('title', 'Sin título')
+                    # Si milestone es un string
+                    else:
+                        milestone_title = issue['milestone']
                     f.write(f"**Milestone:** {milestone_title}\n\n")
                 if issue.get('labels'):
                     labels = format_labels(issue['labels'])
@@ -290,9 +291,8 @@ El Servidor Eureka es el componente central de registro y descubrimiento de serv
                 f.write(f"{body}\n\n---\n\n")
 
         return True
-
-    except Exception as e:
-        print(f"Error generando contenido de la wiki: {e}")
+    except IOError as e:
+        print(f"Error escribiendo archivos de la wiki del Servicio Facturador: {e}")
         return False
 
 def verify_json_content(file_path):
