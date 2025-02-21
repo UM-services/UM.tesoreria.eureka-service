@@ -1,6 +1,6 @@
 # UM.tesoreria.eureka-service
 
-Estado del CI: [![UM.tesoreria.eureka-service CI](https://github.com/UM-services/UM.tesoreria.eureka-service/actions/workflows/maven.yml/badge.svg?branch=main)](https://github.com/UM-services/UM.tesoreria.eureka-service/actions/workflows/maven.yml)
+[![Estado del CI](https://github.com/UM-services/UM.tesoreria.eureka-service/actions/workflows/maven.yml/badge.svg?branch=main)](https://github.com/UM-services/UM.tesoreria.eureka-service/actions/workflows/maven.yml)
 
 ## Descripción
 
@@ -15,7 +15,7 @@ Servidor de descubrimiento Eureka para la arquitectura de microservicios de UM T
 ## Stack Tecnológico
 
 - Java 21
-- Spring Boot 3.4.2
+- Spring Boot 3.4.3
 - Spring Cloud 2024.0.0
 - Netflix Eureka Server
 - Spring Boot Actuator
