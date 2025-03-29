@@ -14,7 +14,7 @@ Servidor de descubrimiento Eureka para la arquitectura de microservicios de UM T
 
 ## Stack Tecnológico
 
-- Java 24
+- Java 21
 - Spring Boot 3.4.4
 - Spring Cloud 2024.0.1
 - Netflix Eureka Server
