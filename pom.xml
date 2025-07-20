@@ -9,10 +9,10 @@
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
-	<groupId>ar.edu.tesoreria.eureka</groupId>
-	<artifactId>eureka-service</artifactId>
+	<groupId>ar.edu</groupId>
+	<artifactId>tesoreria.eureka-service</artifactId>
 	<version>0.0.2</version>
-	<name>eureka-service</name>
+	<name>um.tesoreria.eureka-service</name>
 	<description>Spring Boot Microservice Eureka</description>
 	<properties>
 		<java.version>24</java.version>
