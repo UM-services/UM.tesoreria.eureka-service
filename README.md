@@ -15,20 +15,22 @@ Servidor de descubrimiento Eureka para la arquitectura de microservicios de UM T
 ## Stack Tecnológico
 
 - Java 24
-- Spring Boot 3.5.0
+- Spring Boot 3.5.3
 - Spring Cloud 2025.0.0
 - Netflix Eureka Server
 - Spring Boot Actuator
 - Caffeine Cache
+- SonarCloud
+- JaCoCo
 
 ## Documentación
 
 La documentación completa del proyecto está disponible en:
 
-- [Documentación Técnica](https://um-services.github.io/UM.tesoreria.eureka-service/project-documentation)
+- [Documentación Técnica](https://um-services.github.io/UM.tesoreria.eureka-service)
 - [Wiki del Proyecto](https://github.com/UM-services/UM.tesoreria.eureka-service/wiki)
-- [Guía de Desarrollo](https://um-services.github.io/UM.tesoreria.eureka-service/development-guide)
-- [Changelog](https://um-services.github.io/UM.tesoreria.eureka-service/changelog)
+- [Análisis de Código](https://sonarcloud.io/dashboard?id=UM-services_UM.tesoreria.eureka-service)
+- [Changelog](CHANGELOG.md)
 
 ## Estado del Proyecto
 
