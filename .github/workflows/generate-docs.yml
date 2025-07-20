@@ -1,21 +1,20 @@
 name: Generate Documentation
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   push:
     branches: [main]
-  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+  issues: read
+  pull-requests: read
 
 jobs:
-  build:
+  generate-docs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -37,92 +36,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p docs/diagrams
+          mkdir -p docs
           
-          # Crear los diagramas Mermaid directamente
-          cat > docs/diagrams/arquitectura-eureka.mmd << 'EOF'
-          graph TB
-              E[Eureka Server]
-              subgraph "Registro de Servicios"
-                  S1[Servicio 1]
-                  S2[Servicio 2]
-                  S3[Servicio N]
-              end
-              subgraph "Descubrimiento"
-                  C1[Cliente 1]
-                  C2[Cliente 2]
-                  C3[Cliente N]
-              end
-              S1 -->|"Registra"| E
-              S2 -->|"Registra"| E
-              S3 -->|"Registra"| E
-              C1 -->|"Consulta"| E
-              C2 -->|"Consulta"| E
-              C3 -->|"Consulta"| E
-              E -->|"Info Servicios"| C1
-              E -->|"Info Servicios"| C2
-              E -->|"Info Servicios"| C3
-          EOF
-
-          cat > docs/diagrams/secuencia-eureka.mmd << 'EOF'
-          sequenceDiagram
-              participant C as Cliente
-              participant E as Eureka Server
-              participant S as Servicio
-              S->>E: POST /eureka/apps/{APP}
-              E-->>S: Registro Confirmado
-              loop Heartbeat
-                  S->>E: PUT /eureka/apps/{APP}/{ID}
-                  E-->>S: Renovación OK
-              end
-              C->>E: GET /eureka/apps
-              E-->>C: Lista de Servicios
-              C->>E: GET /eureka/apps/{APP}
-              E-->>C: Detalles del Servicio
-              Note over C,S: Comunicación directa cliente-servicio
-              opt Servicio No Responde
-                  E->>S: Health Check
-                  S--xE: Timeout
-                  E->>E: Eliminar Registro
-              end
-          EOF
-
-          cat > docs/diagrams/despliegue-eureka.mmd << 'EOF'
-          graph LR
-              E1[Eureka 1]
-              E2[Eureka 2]
-              E3[Eureka 3]
-              LB[HAProxy/NGINX]
-              E1 <-->|Replica| E2
-              E2 <-->|Replica| E3
-              E3 <-->|Replica| E1
-              LB -->|Tráfico| E1
-              LB -->|Tráfico| E2
-              LB -->|Tráfico| E3
-              subgraph Zona1
-                  E1
-              end
-              subgraph Zona2
-                  E2
-              end
-              subgraph Zona3
-                  E3
-              end
-          EOF
-
           echo "Fetching project information from GitHub API..."
           curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${{ github.repository }}/milestones" > milestones.json
           curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${{ github.repository }}/issues?state=all&per_page=100" > issues.json
           curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${{ github.repository }}/pulls?state=all&per_page=100" > prs.json
           
-          mkdir -p docs
           cat > docs/index.html << 'EOF'
           <!DOCTYPE html>
           <html lang="es">
           <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>UM Tesorería Eureka Service - Documentación del Proyecto</title>
+              <title>UM Haberes Core Service - Documentación del Proyecto</title>
               <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
               <style>
                   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
@@ -138,83 +65,26 @@ jobs:
                   .progress-bar { width: 100%; height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden; }
                   .progress-fill { height: 100%; background: #28a745; transition: width 0.3s ease; }
                   pre { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 1rem; white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; }
-                  .info-box { background-color: #e3f2fd; border-left: 4px solid #1976d2; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
-                  .warning-box { background-color: #fff3e0; border-left: 4px solid #ff9800; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
-                  .tip-box { background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
               </style>
           </head>
           <body>
               <div class="header">
-                  <h1>� UM Tesorería Eureka Service</h1>
-                  <p>Servidor de Descubrimiento y Registro de Servicios</p>
+                  <h1>📋 UM Haberes Core Service - Documentación del Proyecto</h1>
+                  <p>Servicio central para la gestión de haberes y liquidaciones de la Universidad.</p>
                   <p>Última actualización: <span id="update-date"></span></p>
               </div>
-              <div id="overview" class="section">
-                  <h2>📌 Descripción General</h2>
-                  <p>El Servidor Eureka es un componente crítico en nuestra arquitectura de microservicios, actuando como el registro central y sistema de descubrimiento de servicios. Proporciona las siguientes funcionalidades clave:</p>
-                  <ul>
-                      <li>Registro automático de servicios</li>
-                      <li>Descubrimiento dinámico de endpoints</li>
-                      <li>Monitoreo de salud de servicios</li>
-                      <li>Balanceo de carga cliente-side</li>
-                      <li>Alta disponibilidad</li>
-                  </ul>
-                  <div class="info-box">
-                      <strong>Versión Actual:</strong> 0.0.2<br>
-                      <strong>Spring Boot:</strong> 3.5.3<br>
-                      <strong>Spring Cloud:</strong> 2025.0.0<br>
-                      <strong>Java:</strong> 24
-                  </div>
-              </div>
-
               <div id="stats" class="stats"></div>
-
-              <div id="architecture" class="section">
-                  <h2>🏛️ Arquitectura</h2>
-                  <p>Diagrama de la arquitectura general del Servidor Eureka y su interacción con otros componentes:</p>
-                  <div class="mermaid" id="architecture-diagram"></div>
-              </div>
-
-              <div id="sequence-diagram" class="section">
-                  <h2>🔄 Flujo de Registro y Descubrimiento</h2>
-                  <p>Secuencia detallada del proceso de registro y descubrimiento de servicios:</p>
-                  <div class="mermaid" id="sequence-diagram-content"></div>
-              </div>
-
-              <div id="deployment-diagram" class="section">
-                  <h2>🚀 Arquitectura de Despliegue</h2>
-                  <p>Diagrama de la arquitectura de despliegue en alta disponibilidad:</p>
-                  <div class="mermaid" id="deployment-diagram-content"></div>
-              </div>
-
+              <div id="architecture" class="section"></div>
+              <div id="sequence-diagram" class="section"></div>
+              <div id="erd-diagram" class="section"></div>
+              <div id="deployment-diagram" class="section"></div>
               <div id="dependencies" class="section">
                   <h2>🌳 Grafo de Dependencias</h2>
-                  <p>Árbol de dependencias del proyecto, generado por Maven:</p>
+                  <p>El siguiente es el árbol de dependencias completo del proyecto, generado por Maven.</p>
                   <pre id="dependency-tree-content">Cargando...</pre>
               </div>
-
               <div id="milestones" class="section"></div>
               <div id="pull-requests" class="section"></div>
-
-              <div id="configuration" class="section">
-                  <h2>⚙️ Configuración</h2>
-                  <div class="tip-box">
-                      <h3>Variables de Entorno</h3>
-                      <ul>
-                          <li><code>SERVER_PORT</code>: Puerto del servidor (default: 8761)</li>
-                          <li><code>EUREKA_INSTANCE_HOSTNAME</code>: Hostname del servidor</li>
-                          <li><code>EUREKA_CLIENT_SERVICEURL_DEFAULTZONE</code>: URLs de otros servidores Eureka</li>
-                      </ul>
-                  </div>
-                  <div class="warning-box">
-                      <h3>Consideraciones de Seguridad</h3>
-                      <ul>
-                          <li>Configurar autenticación en producción</li>
-                          <li>Usar HTTPS para comunicaciones</li>
-                          <li>Restringir acceso a la red interna</li>
-                      </ul>
-                  </div>
-              </div>
           
               <script>mermaid.initialize({startOnLoad:true});</script>
               <script>
@@ -254,27 +124,39 @@ jobs:
               document.getElementById('stats').innerHTML = statsHTML;
 
               // --- Architecture Diagram ---
-              fetch('diagrams/arquitectura-eureka.mmd')
+              fetch('diagrams/arquitectura-general.mmd')
                   .then(response => response.text())
                   .then(data => {
-                      document.getElementById('architecture-diagram').innerHTML = data;
-                      mermaid.init(undefined, document.getElementById('architecture-diagram'));
+                      const architectureContainer = document.getElementById('architecture');
+                      architectureContainer.innerHTML = '<h2>🏛️ Arquitectura General del Servicio</h2><div class="mermaid">' + data + '</div>';
+                      mermaid.init(undefined, architectureContainer.querySelector('.mermaid'));
                   });
 
               // --- Sequence Diagram ---
-              fetch('diagrams/secuencia-eureka.mmd')
+              fetch('diagrams/flujo-liquidacion-sueldos.mmd')
                   .then(response => response.text())
                   .then(data => {
-                      document.getElementById('sequence-diagram-content').innerHTML = data;
-                      mermaid.init(undefined, document.getElementById('sequence-diagram-content'));
+                      const sequenceContainer = document.getElementById('sequence-diagram');
+                      sequenceContainer.innerHTML = '<h2>🔄 Diagrama de Secuencia: Liquidación de Sueldos</h2><div class="mermaid">' + data + '</div>';
+                      mermaid.init(undefined, sequenceContainer.querySelector('.mermaid'));
+                  });
+
+              // --- ERD Diagram ---
+              fetch('diagrams/modelo-entidad-relacion.mmd')
+                  .then(response => response.text())
+                  .then(data => {
+                      const erdContainer = document.getElementById('erd-diagram');
+                      erdContainer.innerHTML = '<h2>🗃️ Diagrama de Entidad-Relación (Simplificado)</h2><div class="mermaid">' + data + '</div>';
+                      mermaid.init(undefined, erdContainer.querySelector('.mermaid'));
                   });
 
               // --- Deployment Diagram ---
-              fetch('diagrams/despliegue-eureka.mmd')
+              fetch('diagrams/despliegue.mmd')
                   .then(response => response.text())
                   .then(data => {
-                      document.getElementById('deployment-diagram-content').innerHTML = data;
-                      mermaid.init(undefined, document.getElementById('deployment-diagram-content'));
+                      const deploymentContainer = document.getElementById('deployment-diagram');
+                      deploymentContainer.innerHTML = '<h2>🚀 Diagrama de Despliegue</h2><div class="mermaid">' + data + '</div>';
+                      mermaid.init(undefined, deploymentContainer.querySelector('.mermaid'));
                   });
           
               // --- Milestones ---
@@ -338,29 +220,21 @@ jobs:
           
           # Create a simple Home.md as a portal
           cat > Home.md << EOF
-          # � UM Tesorería Eureka Service
+          # 📋 Wiki del Proyecto UM Haberes Core Service
 
-          Servidor de descubrimiento y registro de servicios para la arquitectura de microservicios de UM Tesorería.
+          Esta wiki sirve como un portal de acceso rápido a los recursos más importantes del proyecto.
 
-          La **documentación detallada, interactiva y actualizada** se encuentra en nuestro sitio de **GitHub Pages**.
+          Toda la **documentación detallada, interactiva y actualizada** se encuentra en nuestro sitio de **GitHub Pages**.
 
           ## ➡️ [Acceder a la Documentación Principal](https://$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]').github.io/$(echo ${{ github.repository }} | cut -d'/' -f2)/)
 
-          ## Características Principales
+          ---
 
-          - Registro automático de microservicios
-          - Descubrimiento dinámico de servicios
-          - Balanceo de carga
-          - Monitoreo de salud de servicios
-          - Alta disponibilidad
+          ### Accesos Directos a GitHub
 
-          ## Enlaces Rápidos
-
-          - 📊 [Dashboard Eureka](http://localhost:8761)
-          - 📈 [Análisis de Código](https://sonarcloud.io/dashboard?id=UM-services_UM.tesoreria.eureka-service)
-          - 📋 [Issues](https://github.com/${{ github.repository }}/issues)
-          - 🔄 [Pull Requests](https://github.com/${{ github.repository }}/pulls)
-          - 🎯 [Milestones](https://github.com/${{ github.repository }}/milestones)
+          *   **[Issues](https://github.com/${{ github.repository }}/issues)**: Ver todos los issues, abiertos y cerrados.
+          *   **[Pull Requests](https://github.com/${{ github.repository }}/pulls)**: Ver todos los Pull Requests.
+          *   **[Milestones](https://github.com/${{ github.repository }}/milestones)**: Ver el progreso de los hitos del proyecto.
           EOF
 
           # Clean up old, now-unused wiki pages
@@ -373,21 +247,21 @@ jobs:
             git push --set-upstream https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git master
           fi
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
+      - name: Upload artifacts
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs
 
-  deploy:
+  deploy-pages:
+    needs: generate-docs
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true)
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
