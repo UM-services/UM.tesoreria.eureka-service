@@ -3,24 +3,24 @@ sequenceDiagram
     participant E as Eureka Server
     participant S as Servicio
 
-    S->>E: Registra (POST /eureka/apps/{APP})
-    E-->>S: Confirma Registro
-    
+    S->>E: POST /eureka/apps/{APP}
+    E-->>S: Registro Confirmado
+
     loop Heartbeat
-        S->>E: Renovar Lease (PUT /eureka/apps/{APP}/{ID})
-        E-->>S: Confirma Renovación
+        S->>E: PUT /eureka/apps/{APP}/{ID}
+        E-->>S: Renovación OK
     end
-    
-    C->>E: Consulta Servicios (GET /eureka/apps)
-    E-->>C: Lista de Servicios Disponibles
-    
-    C->>E: Consulta Específica (GET /eureka/apps/{APP})
+
+    C->>E: GET /eureka/apps
+    E-->>C: Lista de Servicios
+
+    C->>E: GET /eureka/apps/{APP}
     E-->>C: Detalles del Servicio
-    
-    Note over C,S: El cliente puede ahora comunicarse directamente con el servicio
-    
+
+    Note over C,S: Comunicación directa cliente-servicio
+
     opt Servicio No Responde
-        E->>S: Verificar Estado
-        S--xE: Sin Respuesta
-        E->>E: Elimina Registro
+        E->>S: Health Check
+        S--xE: Timeout
+        E->>E: Eliminar Registro
     end
