@@ -1,0 +1,26 @@
+graph LR
+    subgraph "Despliegue de Eureka"
+        subgraph "Zona 1"
+            E1[Eureka Server 1]
+        end
+        
+        subgraph "Zona 2"
+            E2[Eureka Server 2]
+        end
+        
+        subgraph "Zona 3"
+            E3[Eureka Server 3]
+        end
+        
+        E1 <-->|Replicación| E2
+        E2 <-->|Replicación| E3
+        E3 <-->|Replicación| E1
+        
+        subgraph "Balanceador de Carga"
+            LB[HAProxy/NGINX]
+        end
+        
+        LB -->|Distribuye Tráfico| E1
+        LB -->|Distribuye Tráfico| E2
+        LB -->|Distribuye Tráfico| E3
+    end
