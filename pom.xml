@@ -12,7 +12,7 @@
 	<groupId>ar.edu</groupId>
 	<artifactId>tesoreria.eureka-service</artifactId>
 	<version>0.0.2</version>
-	<name>um.tesoreria.eureka-service</name>
+	<name>UM.tesoreria.eureka-service</name>
 	<description>Spring Boot Microservice Eureka</description>
 	<properties>
 		<java.version>24</java.version>
