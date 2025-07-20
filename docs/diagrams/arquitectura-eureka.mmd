@@ -1,0 +1,28 @@
+graph TB
+    subgraph "Arquitectura del Servidor Eureka"
+        E[Eureka Server]
+        
+        subgraph "Registro de Servicios"
+            S1[Servicio 1]
+            S2[Servicio 2]
+            S3[Servicio N]
+        end
+        
+        subgraph "Descubrimiento"
+            C1[Cliente 1]
+            C2[Cliente 2]
+            C3[Cliente N]
+        end
+        
+        S1 -->|Registra| E
+        S2 -->|Registra| E
+        S3 -->|Registra| E
+        
+        C1 -->|Consulta| E
+        C2 -->|Consulta| E
+        C3 -->|Consulta| E
+        
+        E -->|Información de Servicios| C1
+        E -->|Información de Servicios| C2
+        E -->|Información de Servicios| C3
+    end
