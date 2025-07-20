@@ -1,21 +1,15 @@
 name: Generate Documentation
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
   push:
     branches: [main]
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN
 permissions:
   contents: read
   pages: write
   id-token: write
-  issues: read
-  pull-requests: read
 
-# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -45,9 +39,77 @@ jobs:
         run: |
           mkdir -p docs/diagrams
           
-          # Copiar diagramas Mermaid
-          cp docs/diagrams/*.mmd docs/diagrams/ || true
-          
+          # Crear los diagramas Mermaid directamente
+          cat > docs/diagrams/arquitectura-eureka.mmd << 'EOF'
+          graph TB
+              E[Eureka Server]
+              subgraph "Registro de Servicios"
+                  S1[Servicio 1]
+                  S2[Servicio 2]
+                  S3[Servicio N]
+              end
+              subgraph "Descubrimiento"
+                  C1[Cliente 1]
+                  C2[Cliente 2]
+                  C3[Cliente N]
+              end
+              S1 -->|"Registra"| E
+              S2 -->|"Registra"| E
+              S3 -->|"Registra"| E
+              C1 -->|"Consulta"| E
+              C2 -->|"Consulta"| E
+              C3 -->|"Consulta"| E
+              E -->|"Info Servicios"| C1
+              E -->|"Info Servicios"| C2
+              E -->|"Info Servicios"| C3
+          EOF
+
+          cat > docs/diagrams/secuencia-eureka.mmd << 'EOF'
+          sequenceDiagram
+              participant C as Cliente
+              participant E as Eureka Server
+              participant S as Servicio
+              S->>E: POST /eureka/apps/{APP}
+              E-->>S: Registro Confirmado
+              loop Heartbeat
+                  S->>E: PUT /eureka/apps/{APP}/{ID}
+                  E-->>S: Renovación OK
+              end
+              C->>E: GET /eureka/apps
+              E-->>C: Lista de Servicios
+              C->>E: GET /eureka/apps/{APP}
+              E-->>C: Detalles del Servicio
+              Note over C,S: Comunicación directa cliente-servicio
+              opt Servicio No Responde
+                  E->>S: Health Check
+                  S--xE: Timeout
+                  E->>E: Eliminar Registro
+              end
+          EOF
+
+          cat > docs/diagrams/despliegue-eureka.mmd << 'EOF'
+          graph LR
+              E1[Eureka 1]
+              E2[Eureka 2]
+              E3[Eureka 3]
+              LB[HAProxy/NGINX]
+              E1 <-->|Replica| E2
+              E2 <-->|Replica| E3
+              E3 <-->|Replica| E1
+              LB -->|Tráfico| E1
+              LB -->|Tráfico| E2
+              LB -->|Tráfico| E3
+              subgraph Zona1
+                  E1
+              end
+              subgraph Zona2
+                  E2
+              end
+              subgraph Zona3
+                  E3
+              end
+          EOF
+
           echo "Fetching project information from GitHub API..."
           curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${{ github.repository }}/milestones" > milestones.json
           curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${{ github.repository }}/issues?state=all&per_page=100" > issues.json
